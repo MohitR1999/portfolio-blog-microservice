@@ -2,8 +2,8 @@ services:
   blog:
     build: .
     ports:
-      - "5000:5000"
-      - "9229:9229"
+      - "5001:5001"
+      - "9230:9230"
     command: npm run dev
     develop:
       watch:
@@ -23,6 +23,6 @@ services:
     restart: always
     env_file: ".env"
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - ./mongo-seed:/docker-entrypoint-initdb.d/

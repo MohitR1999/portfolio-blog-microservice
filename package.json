@@ -4,7 +4,9 @@
   "description": "Blog microservice for the portfolio blog website",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test jest",
+    "start": "NODE_ENV=prod node src/app.js",
+    "dev": "NODE_ENV=dev node --inspect=0.0.0.0:9230 src/app.js"
   },
   "keywords": [
     "microservice",
