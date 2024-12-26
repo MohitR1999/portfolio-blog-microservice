@@ -1,0 +1,28 @@
+services:
+  blog:
+    build: .
+    ports:
+      - "5000:5000"
+      - "9229:9229"
+    command: npm run dev
+    develop:
+      watch:
+        - action : rebuild
+          path : ./package.json
+
+        - action : sync+restart
+          path : .
+          target : /usr/src/app
+          exec : 
+            command : npm run dev
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    env_file: ".env"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-seed:/docker-entrypoint-initdb.d/
