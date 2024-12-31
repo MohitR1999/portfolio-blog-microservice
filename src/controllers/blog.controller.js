@@ -116,7 +116,54 @@ const getAllBlogs = async (req, res) => {
 }
 
 const updateBlog = async (req, res) => {
+    const id = req.params.id;
+    const token = getTokenFromHeaders(req);
+    if (!token) {
+        throw new MissingTokenError();
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.id;
+        if (!id) {
+            throw new ValidationError("Please provide the id of the blog");
+        }
+        const { title, content } = req.body;
+        if (!title && !content) {
+            throw new ValidationError("Please provide either title or content to be updated");
+        }
 
+        const post = await Blog.findById(id);
+        if (post) {
+            // if we modify the title, then change it
+            if (title) {
+                post.title = title;
+            }
+            // if we modify the content, then change it
+            if (content) {
+                post.content = content;
+            }
+
+            post.modified_at = Date.now();
+            await post.save();
+            res.status(SUCCESS_OK).json(post);
+        } else {
+            throw new NotFoundError("Blog");
+        }
+    } catch (err) {
+        if (!err.status) {
+            console.log(err);
+            return res.status(INTERNAL_SERVER_ERROR).json({
+                error: `Internal server error: ${err.message}`
+            })
+        }
+
+        else {
+            return res.status(err.status).json({
+                error: err.message
+            })
+        }
+    }
 }
 
 const deleteBlog = async (req, res) => {

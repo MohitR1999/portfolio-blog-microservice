@@ -98,6 +98,10 @@ describe('Fetch a single blog post by ID', () => {
 
 describe('Update a blog post', () => {
     let created_id = "";
+    const newBlog = {
+        title : "Updated title",
+        content : "Updated content"
+    }
     
     beforeAll(async () => {
         await connectDB(globalThis.__MONGO_URI__);
@@ -115,18 +119,17 @@ describe('Update a blog post', () => {
         });
 
         expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
-        expect(res.body).toHaveProperty('id');
-        created_id = res.body.id;
+        expect(res.body).toHaveProperty('_id');
+        created_id = res.body._id;
     });
 
     it('Should update a single blog post by specified ID', async () => {
-        const res = await request(app).put(`/api/blogs/${created_id}`).set(baseHeaders).send({
-            title : "Updated title",
-            content : "Updated content"
-        });
-        expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
-        expect(res.body).toHaveProperty('id');
-        expect(res.body.id).toBe(created_id);
+        const res = await request(app).put(`/api/blogs/${created_id}`).set(baseHeaders).send(newBlog);
+        expect(res.statusCode).toBe(StatusCodes.SUCCESS_OK);
+        expect(res.body).toHaveProperty('_id');
+        expect(res.body._id).toBe(created_id);
+        expect(res.body.title).toBe(newBlog.title);
+        expect(res.body.content).toBe(newBlog.content);
     });
 
 
