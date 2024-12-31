@@ -1,5 +1,7 @@
 const { MISSING_TOKEN, INVALID_TOKEN, MISSING_BLOG_TITLE, MISSING_BLOG_CONTENT } = require("../constants/Error");
 const { UNAUTHORIZED, ACCESS_DENIED, SUCCESS_OK, INTERNAL_SERVER_ERROR, SUCCESS_CREATED } = require("../constants/StatusCodes");
+const { BLOG_DELETED_SUCCESSFULLY } = require("../constants/Success");
+const InternalError = require("../Errors/InternalError");
 const MissingTokenError = require("../Errors/MissingTokenError");
 const NotFoundError = require("../Errors/NotFoundError");
 const ValidationError = require("../Errors/ValidationError");
@@ -10,11 +12,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const createBlog = async (req, res) => {
     const token = getTokenFromHeaders(req);
-    if (!token) {
-        throw new MissingTokenError();
-    }
-
     try {
+        if (!token) {
+            throw new MissingTokenError();
+        }
         const decoded = jwt.verify(token, JWT_SECRET);
         const userId = decoded.id;
         // since the user is verified, we can now go on to create the blog post
@@ -117,12 +118,12 @@ const getAllBlogs = async (req, res) => {
 
 const updateBlog = async (req, res) => {
     const id = req.params.id;
-    const token = getTokenFromHeaders(req);
-    if (!token) {
-        throw new MissingTokenError();
-    }
     
     try {
+        const token = getTokenFromHeaders(req);
+        if (!token) {
+            throw new MissingTokenError();
+        }
         const decoded = jwt.verify(token, JWT_SECRET);
         const userId = decoded.id;
         if (!id) {
@@ -167,7 +168,40 @@ const updateBlog = async (req, res) => {
 }
 
 const deleteBlog = async (req, res) => {
+    const id = req.params.id;
+    const token = getTokenFromHeaders(req);
+    
+    try {
+        if (!token) {
+            throw new MissingTokenError();
+        }
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.id;
+        if (!id) {
+            throw new ValidationError("Please provide the id of the blog");
+        }
+        const result = await Blog.findByIdAndDelete(id);
+        if (result) {
+            res.status(SUCCESS_OK).json({
+                message : BLOG_DELETED_SUCCESSFULLY
+            });
+        } else {
+            throw new InternalError("Failed to delete the item");
+        }
+    } catch (err) {
+        if (!err.status) {
+            console.log(err);
+            return res.status(INTERNAL_SERVER_ERROR).json({
+                error: `Internal server error: ${err.message}`
+            })
+        }
 
+        else {
+            return res.status(err.status).json({
+                error: err.message
+            })
+        }
+    }
 }
 
 module.exports = {

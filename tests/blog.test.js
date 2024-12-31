@@ -154,8 +154,8 @@ describe('Delete a blog post', () => {
         });
 
         expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
-        expect(res.body).toHaveProperty('id');
-        created_id = res.body.id;
+        expect(res.body).toHaveProperty('_id');
+        created_id = res.body._id;
     });
 
     it('Should delete a blog post by specified ID', async () => {
