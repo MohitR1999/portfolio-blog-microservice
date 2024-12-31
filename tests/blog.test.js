@@ -45,8 +45,22 @@ describe('Fetch all blog posts', () => {
         await mongoose.connection.close();
     })
 
-    it('Should fetch all blog posts', async () => {
-        const res = await request(app).get('/api/blogs').set(baseHeaders).send();
+    it('Should return error 404 status if no blogs are present', async () => {
+        const res = await request(app).get('/api/blogs').send();
+        expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('Should create a blog post with the specified data', async () => {
+        const res = await request(app).post('/api/blogs').set(baseHeaders).send({
+            title : "Test title",
+            content : "This is a test blog"
+        });
+
+        expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
+    });
+
+    it('Should fetch all blog posts if there are any', async () => {
+        const res = await request(app).get('/api/blogs').send();
         expect(res.statusCode).toBe(StatusCodes.SUCCESS_OK);
     });
 });
@@ -70,15 +84,15 @@ describe('Fetch a single blog post by ID', () => {
         });
 
         expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
-        expect(res.body).toHaveProperty('id');
-        created_id = res.body.id;
+        expect(res.body).toHaveProperty('_id');
+        created_id = res.body._id;
     });
 
     it('Should fetch a single blog post by ID', async () => {
-        const res = await request(app).get(`/api/blogs/${created_id}`).set(baseHeaders).send();
-        expect(res.statusCode).toBe(StatusCodes.SUCCESS_CREATED);
-        expect(res.body).toHaveProperty('id');
-        expect(res.body.id).toBe(created_id);
+        const res = await request(app).get(`/api/blogs/${created_id}`).send();
+        expect(res.statusCode).toBe(StatusCodes.SUCCESS_OK);
+        expect(res.body).toHaveProperty('_id');
+        expect(res.body._id).toBe(created_id);
     });
 });
 

@@ -1,6 +1,7 @@
 const { MISSING_TOKEN, INVALID_TOKEN, MISSING_BLOG_TITLE, MISSING_BLOG_CONTENT } = require("../constants/Error");
 const { UNAUTHORIZED, ACCESS_DENIED, SUCCESS_OK, INTERNAL_SERVER_ERROR, SUCCESS_CREATED } = require("../constants/StatusCodes");
 const MissingTokenError = require("../Errors/MissingTokenError");
+const NotFoundError = require("../Errors/NotFoundError");
 const ValidationError = require("../Errors/ValidationError");
 const Blog = require("../models/Blog");
 const { getTokenFromHeaders } = require("../utils/utilities")
@@ -62,11 +63,56 @@ const createBlog = async (req, res) => {
 }
 
 const getBlogById = async (req, res) => {
+    const id = req.params.id;
+    try {
+        if (!id) {
+            throw new ValidationError("Please provide the id of the blog");
+        }
+        
+        const post = await Blog.findById(id);
+        if (post) {
+            res.status(SUCCESS_OK).json(post);
+        } else {
+            throw new NotFoundError("Blog");
+        }
+    } catch (err) {
+        if (!err.status) {
+            console.log(err);
+            return res.status(INTERNAL_SERVER_ERROR).json({
+                error: `Internal server error: ${err.message}`
+            })
+        }
 
+        else {
+            return res.status(err.status).json({
+                error: err.message
+            })
+        }
+    }
 }
 
 const getAllBlogs = async (req, res) => {
+    try {
+        const posts = await Blog.find({});
+        if (posts && posts.length > 0) {
+            res.status(SUCCESS_OK).json(posts);
+        } else {
+            throw new NotFoundError("Blogs");
+        }
+    } catch (err) {
+        if (!err.status) {
+            console.log(err);
+            return res.status(INTERNAL_SERVER_ERROR).json({
+                error: `Internal server error: ${err.message}`
+            })
+        }
 
+        else {
+            return res.status(err.status).json({
+                error: err.message
+            })
+        }
+    }
 }
 
 const updateBlog = async (req, res) => {
