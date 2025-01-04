@@ -21,6 +21,8 @@ services:
   mongo:
     image: mongo
     restart: always
+    hostname: mongo-blog
+    command: mongod --quiet --logpath /dev/null
     env_file: ".env"
     ports:
       - "27018:27017"
