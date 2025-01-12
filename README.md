@@ -78,10 +78,16 @@ Following API endpoints are working as of now:
 
 </details>
 
-#### Fetching all blogs
+#### Fetching all blogs by a specific user
 
 <details>
- <summary><code>GET</code> <code><b>/api/blogs</b></code> <code>(Fetches all the blogs in the database)</code></summary>
+ <summary><code>GET</code> <code><b>/api/blogs</b></code> <code>(Fetches all the blogs in the database, created by a specific user)</code></summary>
+
+##### Headers
+
+> | Header              | Content                     |
+> |---------------------|-----------------------------|
+> | `x-user-id`         | `<User id of the author>`   |
 
 ##### Parameters
 
@@ -101,7 +107,7 @@ Following API endpoints are working as of now:
 ##### Example cURL
 
 > ```bash
->  curl --location 'http://localhost:5001/api/blogs'
+>  curl --location 'http://localhost:5001/api/blogs' --header 'x-user-id: 678386121d2fcfc09d115d75'
 > ```
 
 ##### Example response
@@ -112,7 +118,7 @@ Following API endpoints are working as of now:
 >         "_id": "677937f0a19657fa3ac31f70",
 >         "title": "My blog!",
 >         "content": "Hello this is a new blog",
->         "author": "6775277a20d4082bb2730063",
+>         "author": "678386121d2fcfc09d115d75",
 >         "created_at": "2025-01-04T13:30:24.419Z",
 >         "__v": 0
 >     }
