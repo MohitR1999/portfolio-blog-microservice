@@ -94,7 +94,12 @@ const getBlogById = async (req, res) => {
 
 const getAllBlogs = async (req, res) => {
     try {
-        const posts = await Blog.find({});
+        const userId = req.headers['x-user-id'];
+        if (!userId) {
+            throw new ValidationError('No user id was provided');
+        }
+        
+        const posts = await Blog.find({ author : userId });
         if (posts && posts.length > 0) {
             res.status(SUCCESS_OK).json(posts);
         } else {
