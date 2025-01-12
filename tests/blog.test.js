@@ -12,7 +12,8 @@ const baseHeaders = {
     'Authorization' : ''
 }
 const JWT_SECRET = process.env.JWT_SECRET;
-validToken = jwt.sign({ id : "6773ab11b15cc1f9281b9c0a" }, JWT_SECRET);
+const userId = "6773ab11b15cc1f9281b9c0a";
+validToken = jwt.sign({ id : userId }, JWT_SECRET);
 baseHeaders['Authorization'] = `Bearer ${validToken}`;
 
 describe('Create a new blog post', () => {
@@ -35,7 +36,7 @@ describe('Create a new blog post', () => {
     });
 });
 
-describe('Fetch all blog posts', () => {
+describe('Fetch all blog posts by a specific user', () => {
     beforeAll(async () => {
         await connectDB(globalThis.__MONGO_URI__);
     })
@@ -45,8 +46,15 @@ describe('Fetch all blog posts', () => {
         await mongoose.connection.close();
     })
 
-    it('Should return error 404 status if no blogs are present', async () => {
+    it('Should return error 400 status if no user ID is provided', async () => {
         const res = await request(app).get('/api/blogs').send();
+        expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('Should return error 404 status if no blogs are present', async () => {
+        const res = await request(app).get('/api/blogs').set({
+            'x-user-id' : userId
+        }).send();
         expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
     });
 
@@ -60,7 +68,9 @@ describe('Fetch all blog posts', () => {
     });
 
     it('Should fetch all blog posts if there are any', async () => {
-        const res = await request(app).get('/api/blogs').send();
+        const res = await request(app).get('/api/blogs').set({
+            'x-user-id' : userId
+        }).send();
         expect(res.statusCode).toBe(StatusCodes.SUCCESS_OK);
     });
 });
